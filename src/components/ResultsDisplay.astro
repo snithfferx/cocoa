@@ -1,0 +1,364 @@
+---
+interface Props {
+  result?: {
+    avg: number;
+    ovv: string;
+    totals: {
+      quarters: number[];
+      imgs: string[];
+    };
+  };
+  error?: string;
+}
+
+const { result, error } = Astro.props;
+---
+
+{result && (
+  <div class="results-container">
+    <div class="results-card">
+      <div class="results-header">
+        <h2>Resultados del Análisis</h2>
+        <div class="average-display">
+          <span class="average-label">Promedio de Colonias:</span>
+          <span class="average-value">{result.avg}</span>
+        </div>
+      </div>
+
+      <div class="results-content">
+        <!-- Imagen Overview -->
+        <div class="overview-section">
+          <h3>Vista General</h3>
+          <div class="overview-image">
+            <img 
+              src={`data:image/png;base64,${result.ovv}`} 
+              alt="Vista general con cuadrantes"
+              class="overview-img"
+            />
+          </div>
+        </div>
+
+        <!-- Detalles por cuadrante -->
+        <div class="quarters-section">
+          <h3>Detalles por Cuadrante</h3>
+          <div class="quarters-grid">
+            {result.totals.quarters.map((count, index) => (
+              <div class="quarter-card">
+                <div class="quarter-header">
+                  <span class="quarter-title">Cuadrante {index + 1}</span>
+                  <span class="quarter-count">{count} colonias</span>
+                </div>
+                {result.totals.imgs[index] && (
+                  <div class="quarter-image">
+                    <img 
+                      src={`data:image/png;base64,${result.totals.imgs[index]}`} 
+                      alt={`Cuadrante ${index + 1}`}
+                      class="quarter-img"
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <!-- Estadísticas adicionales -->
+        <div class="stats-section">
+          <h3>Estadísticas</h3>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <span class="stat-label">Total de Cuadrantes:</span>
+              <span class="stat-value">{result.totals.quarters.length}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Colonias Totales:</span>
+              <span class="stat-value">{result.totals.quarters.reduce((sum, count) => sum + count, 0)}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Máximo por Cuadrante:</span>
+              <span class="stat-value">{Math.max(...result.totals.quarters)}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Mínimo por Cuadrante:</span>
+              <span class="stat-value">{Math.min(...result.totals.quarters)}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="results-actions">
+        <button onclick="window.location.reload()" class="new-analysis-btn">
+          Nuevo Análisis
+        </button>
+        <button onclick="window.print()" class="print-btn">
+          Imprimir Resultados
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+{error && (
+  <div class="error-container">
+    <div class="error-card">
+      <div class="error-icon">⚠️</div>
+      <h2>Error en el Procesamiento</h2>
+      <p>{error}</p>
+      <button onclick="window.location.reload()" class="retry-btn">
+        Intentar de Nuevo
+      </button>
+    </div>
+  </div>
+)}
+
+<style>
+  .results-container,
+  .error-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  .results-card,
+  .error-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .results-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  .results-header h2 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin: 0 0 20px 0;
+  }
+
+  .average-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px 30px;
+    border-radius: 15px;
+    font-size: 1.3rem;
+  }
+
+  .average-label {
+    font-weight: 500;
+  }
+
+  .average-value {
+    font-weight: 700;
+    font-size: 1.8rem;
+  }
+
+  .results-content {
+    display: grid;
+    gap: 40px;
+  }
+
+  .overview-section,
+  .quarters-section,
+  .stats-section {
+    background: #f7fafc;
+    padding: 30px;
+    border-radius: 15px;
+  }
+
+  .overview-section h3,
+  .quarters-section h3,
+  .stats-section h3 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0 0 20px 0;
+  }
+
+  .overview-image {
+    text-align: center;
+  }
+
+  .overview-img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .quarters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+  }
+
+  .quarter-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s;
+  }
+
+  .quarter-card:hover {
+    transform: translateY(-2px);
+  }
+
+  .quarter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  .quarter-title {
+    font-weight: 600;
+    color: #4a5568;
+  }
+
+  .quarter-count {
+    background: #667eea;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .quarter-image {
+    text-align: center;
+  }
+
+  .quarter-img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+  }
+
+  .stat-item {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  }
+
+  .stat-label {
+    display: block;
+    font-size: 0.9rem;
+    color: #718096;
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #2d3748;
+  }
+
+  .results-actions {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 2px solid #e2e8f0;
+  }
+
+  .new-analysis-btn,
+  .print-btn,
+  .retry-btn {
+    padding: 12px 30px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    font-size: 1rem;
+  }
+
+  .new-analysis-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .print-btn {
+    background: #48bb78;
+    color: white;
+  }
+
+  .retry-btn {
+    background: #ed8936;
+    color: white;
+  }
+
+  .new-analysis-btn:hover,
+  .print-btn:hover,
+  .retry-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  .error-card {
+    text-align: center;
+    max-width: 500px;
+  }
+
+  .error-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+  }
+
+  .error-card h2 {
+    color: #e53e3e;
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+  }
+
+  .error-card p {
+    color: #718096;
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+  }
+
+  @media (max-width: 768px) {
+    .results-card,
+    .error-card {
+      padding: 20px;
+      margin: 10px;
+    }
+
+    .quarters-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .results-actions {
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+</style>

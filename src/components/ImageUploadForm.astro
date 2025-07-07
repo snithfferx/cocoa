@@ -1,0 +1,558 @@
+---
+import { actions } from "astro:actions";
+---
+
+<div class="upload-container">
+	<div class="upload-card">
+		<div class="upload-header">
+			<h1>Contador de Colonias</h1>
+			<p>
+				Sube una imagen para contar automáticamente las colonias
+				bacterianas
+			</p>
+		</div>
+
+		<form
+			method="POST"
+			action={actions.processImage}
+			enctype="multipart/form-data"
+			class="upload-form"
+		>
+			<!-- Información del usuario -->
+			<div class="form-section">
+				<h3>Información del Usuario</h3>
+				<div class="form-row">
+					<div class="form-group">
+						<label for="userName">Nombre:</label>
+						<input
+							type="text"
+							id="userName"
+							name="userName"
+							required
+							placeholder="Tu nombre"
+						/>
+					</div>
+					<div class="form-group">
+						<label for="userEmail">Email:</label>
+						<input
+							type="email"
+							id="userEmail"
+							name="userEmail"
+							required
+							placeholder="tu@email.com"
+						/>
+					</div>
+				</div>
+			</div>
+
+			<!-- Configuración del análisis -->
+			<div class="form-section">
+				<h3>Configuración del Análisis</h3>
+				<div class="form-row">
+					<div class="form-group">
+						<label for="name">Nombre del análisis:</label>
+						<input
+							type="text"
+							id="name"
+							name="name"
+							required
+							placeholder="Ej: Muestra_001"
+						/>
+					</div>
+					<div class="form-group">
+						<label for="quarters">Cuadrantes:</label>
+						<select id="quarters" name="quarters">
+							<option value="2">2x2 (4 cuadrantes)</option>
+							<option value="3">3x3 (9 cuadrantes)</option>
+							<option value="4">4x4 (16 cuadrantes)</option>
+						</select>
+					</div>
+				</div>
+			</div>
+
+			<!-- Subida de imagen -->
+			<div class="form-section">
+				<h3>Imagen a Analizar</h3>
+				<div class="file-upload-area" id="fileUploadArea">
+					<input
+						type="file"
+						id="image"
+						name="image"
+						accept="image/*"
+						required
+						class="file-input"
+					/>
+					<div class="file-upload-content">
+						<svg
+							class="upload-icon"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+						>
+							<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+							></path>
+							<polyline points="7,10 12,15 17,10"></polyline>
+							<line x1="12" y1="15" x2="12" y2="3"></line>
+						</svg>
+						<p class="upload-text">
+							<span class="upload-main"
+								>Haz clic para subir una imagen</span
+							>
+							<span class="upload-sub"
+								>o arrastra y suelta aquí</span
+							>
+						</p>
+						<p class="upload-formats">PNG, JPG, JPEG hasta 10MB</p>
+					</div>
+					<div
+						class="file-preview"
+						id="filePreview"
+						style="display: none;"
+					>
+						<img id="previewImage" alt="Vista previa" />
+						<div class="file-info">
+							<span id="fileName"></span>
+							<button
+								type="button"
+								id="removeFile"
+								class="remove-btn">×</button
+							>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Sensibilidad -->
+			<div class="form-section">
+				<h3>Sensibilidad de Detección</h3>
+				<div class="sensitivity-control">
+					<label for="sensitivity"
+						>Sensibilidad: <span id="sensitivityValue">50</span
+						></label
+					>
+					<input
+						type="range"
+						id="sensitivity"
+						name="sensitivity"
+						min="1"
+						max="100"
+						value="50"
+						class="sensitivity-slider"
+					/>
+					<div class="sensitivity-labels">
+						<span>Baja (1)</span>
+						<span>Media (50)</span>
+						<span>Alta (100)</span>
+					</div>
+				</div>
+			</div>
+
+			<!-- Botón de envío -->
+			<div class="form-actions">
+				<button type="submit" class="submit-btn" id="submitBtn">
+					<span class="btn-text">Analizar Imagen</span>
+					<div class="btn-loader" style="display: none;">
+						<div class="spinner"></div>
+						Procesando...
+					</div>
+				</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+<script>
+	// Manejo del slider de sensibilidad
+	const sensitivitySlider = document.getElementById(
+		"sensitivity",
+	) as HTMLInputElement;
+	const sensitivityValue = document.getElementById("sensitivityValue");
+
+	sensitivitySlider?.addEventListener("input", (e) => {
+		const target = e.target as HTMLInputElement;
+		if (sensitivityValue) {
+			sensitivityValue.textContent = target.value;
+		}
+	});
+
+	// Manejo de la subida de archivos
+	const fileInput = document.getElementById("image") as HTMLInputElement;
+	const fileUploadArea = document.getElementById("fileUploadArea");
+	const filePreview = document.getElementById("filePreview");
+	const previewImage = document.getElementById(
+		"previewImage",
+	) as HTMLImageElement;
+	const fileName = document.getElementById("fileName");
+	const removeFileBtn = document.getElementById("removeFile");
+
+	// Drag and drop
+	fileUploadArea?.addEventListener("dragover", (e) => {
+		e.preventDefault();
+		fileUploadArea.classList.add("drag-over");
+	});
+
+	fileUploadArea?.addEventListener("dragleave", () => {
+		fileUploadArea.classList.remove("drag-over");
+	});
+
+	fileUploadArea?.addEventListener("drop", (e) => {
+		e.preventDefault();
+		fileUploadArea.classList.remove("drag-over");
+
+		const files = e.dataTransfer?.files;
+		if (files && files.length > 0) {
+			handleFileSelect(files[0]);
+		}
+	});
+
+	// Click para seleccionar archivo
+	fileUploadArea?.addEventListener("click", () => {
+		fileInput?.click();
+	});
+
+	fileInput?.addEventListener("change", (e) => {
+		const target = e.target as HTMLInputElement;
+		const file = target.files?.[0];
+		if (file) {
+			handleFileSelect(file);
+		}
+	});
+
+	// Remover archivo
+	removeFileBtn?.addEventListener("click", (e) => {
+		e.stopPropagation();
+		if (fileInput) fileInput.value = "";
+		if (filePreview) filePreview.style.display = "none";
+		if (fileUploadArea) fileUploadArea.style.display = "block";
+	});
+
+	function handleFileSelect(file: File) {
+		if (!file.type.startsWith("image/")) {
+			alert("Por favor selecciona un archivo de imagen válido.");
+			return;
+		}
+
+		if (file.size > 10 * 1024 * 1024) {
+			// 10MB
+			alert("El archivo es demasiado grande. Máximo 10MB.");
+			return;
+		}
+
+		// Mostrar vista previa
+		const reader = new FileReader();
+		reader.onload = (e) => {
+			if (previewImage && e.target?.result) {
+				previewImage.src = e.target.result as string;
+			}
+			if (fileName) {
+				fileName.textContent = file.name;
+			}
+			if (filePreview) {
+				filePreview.style.display = "block";
+			}
+			if (fileUploadArea) {
+				fileUploadArea.style.display = "none";
+			}
+		};
+		reader.readAsDataURL(file);
+	}
+
+	// Manejo del formulario
+	const form = document.querySelector(".upload-form") as HTMLFormElement;
+	const submitBtn = document.getElementById("submitBtn") as HTMLButtonElement;
+	const btnText = document.querySelector(".btn-text") as HTMLButtonElement;
+	const btnLoader = document.querySelector(".btn-loader") as HTMLElement;
+
+	form?.addEventListener("submit", () => {
+		if (btnText) btnText.style.display = "none";
+		if (btnLoader) btnLoader.style.display = "flex";
+		if (submitBtn) submitBtn.disabled = true;
+	});
+</script>
+
+<style>
+	.upload-container {
+		min-height: 100vh;
+		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 20px;
+		font-family:
+			"Inter",
+			-apple-system,
+			BlinkMacSystemFont,
+			sans-serif;
+	}
+
+	.upload-card {
+		background: white;
+		border-radius: 20px;
+		box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+		padding: 40px;
+		max-width: 600px;
+		width: 100%;
+	}
+
+	.upload-header {
+		text-align: center;
+		margin-bottom: 40px;
+	}
+
+	.upload-header h1 {
+		font-size: 2.5rem;
+		font-weight: 700;
+		color: #1a202c;
+		margin: 0 0 10px 0;
+	}
+
+	.upload-header p {
+		color: #718096;
+		font-size: 1.1rem;
+		margin: 0;
+	}
+
+	.form-section {
+		margin-bottom: 30px;
+	}
+
+	.form-section h3 {
+		font-size: 1.2rem;
+		font-weight: 600;
+		color: #2d3748;
+		margin: 0 0 15px 0;
+		border-bottom: 2px solid #e2e8f0;
+		padding-bottom: 8px;
+	}
+
+	.form-row {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 20px;
+	}
+
+	.form-group {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.form-group label {
+		font-weight: 500;
+		color: #4a5568;
+		margin-bottom: 8px;
+	}
+
+	.form-group input,
+	.form-group select {
+		padding: 12px 16px;
+		border: 2px solid #e2e8f0;
+		border-radius: 10px;
+		font-size: 1rem;
+		transition: all 0.2s;
+	}
+
+	.form-group input:focus,
+	.form-group select:focus {
+		outline: none;
+		border-color: #667eea;
+		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+	}
+
+	.file-upload-area {
+		border: 3px dashed #cbd5e0;
+		border-radius: 15px;
+		padding: 40px 20px;
+		text-align: center;
+		cursor: pointer;
+		transition: all 0.3s;
+		position: relative;
+	}
+
+	.file-upload-area:hover,
+	.file-upload-area.drag-over {
+		border-color: #667eea;
+		background-color: #f7fafc;
+	}
+
+	.file-input {
+		position: absolute;
+		opacity: 0;
+		width: 100%;
+		height: 100%;
+		cursor: pointer;
+	}
+
+	.upload-icon {
+		width: 48px;
+		height: 48px;
+		color: #a0aec0;
+		margin-bottom: 16px;
+	}
+
+	.upload-text {
+		margin: 0 0 8px 0;
+	}
+
+	.upload-main {
+		display: block;
+		font-size: 1.1rem;
+		font-weight: 600;
+		color: #2d3748;
+		margin-bottom: 4px;
+	}
+
+	.upload-sub {
+		display: block;
+		color: #718096;
+	}
+
+	.upload-formats {
+		color: #a0aec0;
+		font-size: 0.9rem;
+		margin: 0;
+	}
+
+	.file-preview {
+		display: flex;
+		align-items: center;
+		gap: 15px;
+		padding: 15px;
+		background: #f7fafc;
+		border-radius: 10px;
+	}
+
+	.file-preview img {
+		width: 60px;
+		height: 60px;
+		object-fit: cover;
+		border-radius: 8px;
+	}
+
+	.file-info {
+		flex: 1;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.remove-btn {
+		background: #e53e3e;
+		color: white;
+		border: none;
+		border-radius: 50%;
+		width: 24px;
+		height: 24px;
+		cursor: pointer;
+		font-size: 16px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.sensitivity-control {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+	}
+
+	.sensitivity-control label {
+		font-weight: 500;
+		color: #4a5568;
+	}
+
+	.sensitivity-slider {
+		width: 100%;
+		height: 6px;
+		border-radius: 3px;
+		background: #e2e8f0;
+		outline: none;
+		-webkit-appearance: none;
+	}
+
+	.sensitivity-slider::-webkit-slider-thumb {
+		-webkit-appearance: none;
+		appearance: none;
+		width: 20px;
+		height: 20px;
+		border-radius: 50%;
+		background: #667eea;
+		cursor: pointer;
+	}
+
+	.sensitivity-labels {
+		display: flex;
+		justify-content: space-between;
+		font-size: 0.8rem;
+		color: #718096;
+	}
+
+	.form-actions {
+		text-align: center;
+		margin-top: 40px;
+	}
+
+	.submit-btn {
+		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		color: white;
+		border: none;
+		padding: 16px 40px;
+		border-radius: 12px;
+		font-size: 1.1rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.3s;
+		min-width: 200px;
+		position: relative;
+	}
+
+	.submit-btn:hover:not(:disabled) {
+		transform: translateY(-2px);
+		box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+	}
+
+	.submit-btn:disabled {
+		opacity: 0.7;
+		cursor: not-allowed;
+	}
+
+	.btn-loader {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 10px;
+	}
+
+	.spinner {
+		width: 20px;
+		height: 20px;
+		border: 2px solid rgba(255, 255, 255, 0.3);
+		border-top: 2px solid white;
+		border-radius: 50%;
+		animation: spin 1s linear infinite;
+	}
+
+	@keyframes spin {
+		0% {
+			transform: rotate(0deg);
+		}
+		100% {
+			transform: rotate(360deg);
+		}
+	}
+
+	@media (max-width: 768px) {
+		.upload-card {
+			padding: 20px;
+			margin: 10px;
+		}
+
+		.form-row {
+			grid-template-columns: 1fr;
+			gap: 15px;
+		}
+
+		.upload-header h1 {
+			font-size: 2rem;
+		}
+	}
+</style>

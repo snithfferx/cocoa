@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>Contador de Colonias - Análisis Automático</title>
+		<meta name="description" content="Aplicación para contar automáticamente colonias bacterianas en imágenes de laboratorio" />
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+	</head>
+	<body>
+		<slot />
+	</body>
+</html>
+
+<style is:global>
+	html,
+	body {
+		margin: 0;
+		padding: 0;
+		width: 100%;
+		min-height: 100%;
+		font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+	}
+
+	* {
+		box-sizing: border-box;
+	}
+
+	@media print {
+		.results-actions {
+			display: none !important;
+		}
+		
+		.results-container {
+			background: white !important;
+		}
+		
+		.results-card {
+			box-shadow: none !important;
+			border: 1px solid #e2e8f0;
+		}
+	}
+</style>
