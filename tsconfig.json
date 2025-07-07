@@ -1,0 +1,55 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "include": [".astro/types.d.ts", "**/*"],
+  "exclude": ["dist"],
+  "moduleResolution": "bundler",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@App/*": [
+        "src/app/*"
+      ],
+      "@Components/*": [
+        "src/components/*"
+      ],
+      "@Layouts/*": [
+        "src/layouts/*"
+      ],
+      "@Pages/*": [
+        "src/pages/*"
+      ],
+      "@Styles/*": [
+        "src/styles/*"
+      ],
+      "@Utils/*": [
+        "src/app/utils/*"
+      ],
+      "@Assets/*": [
+        "src/assets/*"
+      ],
+      "@Templates/*": [
+        "src/templates/*"
+      ],
+      "@Views/*": [
+        "src/app/views/*"
+      ],
+      "@Modules/*": [
+        "src/app/modules/*"
+      ],
+      "@Hooks/*": [
+        "src/app/hooks/*"
+      ],
+      "@Types/*": [
+        "src/app/types/*"
+      ],
+      "@Content/*": [
+        "src/content/*"
+      ],
+      "@DB/*": [
+        "db/*"
+      ]
+    },
+    "jsxImportSource": "react",
+    "jsx": "react-jsx"
+  }
+}
