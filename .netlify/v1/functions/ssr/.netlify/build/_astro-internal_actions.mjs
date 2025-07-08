@@ -233,13 +233,64 @@ class CounterController {
       const w = jimpImage.width;
       const qh = Math.floor(h / quarters);
       const qw = Math.floor(w / quarters);
+      const lineColor = 4278190335;
+      const textBackgroundColor = 170;
+      const lineWidth = 3;
+      for (let i = 1; i < quarters; i++) {
+        const x = i * qw;
+        for (let y = 0; y < h; y++) {
+          for (let thickness = 0; thickness < lineWidth; thickness++) {
+            if (x + thickness < w) {
+              jimpImage.setPixelColor(lineColor, x + thickness, y);
+            }
+          }
+        }
+      }
+      for (let i = 1; i < quarters; i++) {
+        const y = i * qh;
+        for (let x = 0; x < w; x++) {
+          for (let thickness = 0; thickness < lineWidth; thickness++) {
+            if (y + thickness < h) {
+              jimpImage.setPixelColor(lineColor, x, y + thickness);
+            }
+          }
+        }
+      }
+      for (let x = 0; x < w; x++) {
+        for (let thickness = 0; thickness < lineWidth; thickness++) {
+          jimpImage.setPixelColor(lineColor, x, thickness);
+          if (h - 1 - thickness >= 0) {
+            jimpImage.setPixelColor(lineColor, x, h - 1 - thickness);
+          }
+        }
+      }
+      for (let y = 0; y < h; y++) {
+        for (let thickness = 0; thickness < lineWidth; thickness++) {
+          jimpImage.setPixelColor(lineColor, thickness, y);
+          if (w - 1 - thickness >= 0) {
+            jimpImage.setPixelColor(lineColor, w - 1 - thickness, y);
+          }
+        }
+      }
       let idx = 0;
       for (let i = 0; i < quarters; i++) {
         for (let j = 0; j < quarters; j++) {
           const x = j * qw;
           const y = i * qh;
           const texto = totals[idx].toString();
-          jimpImage.print({ x: x + 5, y: y + 5, text: texto, font });
+          const textX = x + Math.floor(qw / 2) - texto.length * 4;
+          const textY = y + Math.floor(qh / 2) - 8;
+          const backgroundPadding = 8;
+          const backgroundWidth = texto.length * 8 + backgroundPadding * 2;
+          const backgroundHeight = 16 + backgroundPadding;
+          for (let bgY = textY - backgroundPadding; bgY < textY + backgroundHeight; bgY++) {
+            for (let bgX = textX - backgroundPadding; bgX < textX + backgroundWidth; bgX++) {
+              if (bgX >= x && bgX < x + qw && bgY >= y && bgY < y + qh && bgX >= 0 && bgX < w && bgY >= 0 && bgY < h) {
+                jimpImage.setPixelColor(textBackgroundColor, bgX, bgY);
+              }
+            }
+          }
+          jimpImage.print({ x: Math.max(x + 5, textX), y: Math.max(y + 5, textY), text: texto, font });
           idx++;
         }
       }
