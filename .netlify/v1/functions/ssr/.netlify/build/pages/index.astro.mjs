@@ -1,0 +1,58 @@
+import { e as createComponent, f as createAstro, h as addAttribute, l as renderHead, n as renderSlot, r as renderTemplate, m as maybeRenderHead, o as renderScript, p as renderComponent } from '../chunks/astro/server_CVwy0AaB.mjs';
+import 'kleur/colors';
+import 'clsx';
+/* empty css                                 */
+import { a as actions } from '../chunks/_astro_actions_CzcLow6c.mjs';
+export { renderers } from '../renderers.mjs';
+
+const $$Astro$2 = createAstro();
+const $$Layout = createComponent(($$result, $$props, $$slots) => {
+  const Astro2 = $$result.createAstro($$Astro$2, $$props, $$slots);
+  Astro2.self = $$Layout;
+  return renderTemplate`<html lang="es"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><meta name="generator"${addAttribute(Astro2.generator, "content")}><title>Contador de Colonias - Análisis Automático</title><meta name="description" content="Aplicación para contar automáticamente colonias bacterianas en imágenes de laboratorio"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">${renderHead()}</head> <body> ${renderSlot($$result, $$slots["default"])} </body></html>`;
+}, "E:/CoCoA/astro/src/layouts/Layout.astro", void 0);
+
+const $$ImageUploadForm = createComponent(($$result, $$props, $$slots) => {
+  return renderTemplate`${maybeRenderHead()}<div class="upload-container" data-astro-cid-q2p2pw2v> <div class="upload-card" data-astro-cid-q2p2pw2v> <div class="upload-header" data-astro-cid-q2p2pw2v> <h1 data-astro-cid-q2p2pw2v>Contador de Colonias</h1> <p data-astro-cid-q2p2pw2v>
+Sube una imagen para contar automáticamente las colonias
+				bacterianas
+</p> </div> <form method="POST"${addAttribute(actions.processImage, "action")} enctype="multipart/form-data" class="upload-form" data-astro-cid-q2p2pw2v> <!-- Información del usuario --> <div class="form-section" data-astro-cid-q2p2pw2v> <h3 data-astro-cid-q2p2pw2v>Información del Usuario</h3> <div class="form-row" data-astro-cid-q2p2pw2v> <div class="form-group" data-astro-cid-q2p2pw2v> <label for="userName" data-astro-cid-q2p2pw2v>Nombre:</label> <input type="text" id="userName" name="userName" required placeholder="Tu nombre" data-astro-cid-q2p2pw2v> </div> <div class="form-group" data-astro-cid-q2p2pw2v> <label for="userEmail" data-astro-cid-q2p2pw2v>Email:</label> <input type="email" id="userEmail" name="userEmail" required placeholder="tu@email.com" data-astro-cid-q2p2pw2v> </div> </div> </div> <!-- Configuración del análisis --> <div class="form-section" data-astro-cid-q2p2pw2v> <h3 data-astro-cid-q2p2pw2v>Configuración del Análisis</h3> <div class="form-row" data-astro-cid-q2p2pw2v> <div class="form-group" data-astro-cid-q2p2pw2v> <label for="name" data-astro-cid-q2p2pw2v>Nombre del análisis:</label> <input type="text" id="name" name="name" required placeholder="Ej: Muestra_001" data-astro-cid-q2p2pw2v> </div> <div class="form-group" data-astro-cid-q2p2pw2v> <label for="quarters" data-astro-cid-q2p2pw2v>Cuadrantes:</label> <select id="quarters" name="quarters" data-astro-cid-q2p2pw2v> <option value="2" data-astro-cid-q2p2pw2v>2x2 (4 cuadrantes)</option> <option value="3" data-astro-cid-q2p2pw2v>3x3 (9 cuadrantes)</option> <option value="4" data-astro-cid-q2p2pw2v>4x4 (16 cuadrantes)</option> </select> </div> </div> </div> <!-- Subida de imagen --> <div class="form-section" data-astro-cid-q2p2pw2v> <h3 data-astro-cid-q2p2pw2v>Imagen a Analizar</h3> <div class="file-upload-area" id="fileUploadArea" data-astro-cid-q2p2pw2v> <input type="file" id="image" name="image" accept="image/*" required class="file-input" data-astro-cid-q2p2pw2v> <div class="file-upload-content" data-astro-cid-q2p2pw2v> <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" data-astro-cid-q2p2pw2v> <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" data-astro-cid-q2p2pw2v></path> <polyline points="7,10 12,15 17,10" data-astro-cid-q2p2pw2v></polyline> <line x1="12" y1="15" x2="12" y2="3" data-astro-cid-q2p2pw2v></line> </svg> <p class="upload-text" data-astro-cid-q2p2pw2v> <span class="upload-main" data-astro-cid-q2p2pw2v>Haz clic para subir una imagen</span> <span class="upload-sub" data-astro-cid-q2p2pw2v>o arrastra y suelta aquí</span> </p> <p class="upload-formats" data-astro-cid-q2p2pw2v>PNG, JPG, JPEG hasta 10MB</p> </div> <div class="file-preview" id="filePreview" style="display: none;" data-astro-cid-q2p2pw2v> <img id="previewImage" alt="Vista previa" data-astro-cid-q2p2pw2v> <div class="file-info" data-astro-cid-q2p2pw2v> <span id="fileName" data-astro-cid-q2p2pw2v></span> <button type="button" id="removeFile" class="remove-btn" data-astro-cid-q2p2pw2v>×</button> </div> </div> </div> </div> <!-- Sensibilidad --> <div class="form-section" data-astro-cid-q2p2pw2v> <h3 data-astro-cid-q2p2pw2v>Sensibilidad de Detección</h3> <div class="sensitivity-control" data-astro-cid-q2p2pw2v> <label for="sensitivity" data-astro-cid-q2p2pw2v>Sensibilidad: <span id="sensitivityValue" data-astro-cid-q2p2pw2v>50</span></label> <input type="range" id="sensitivity" name="sensitivity" min="1" max="100" value="50" class="sensitivity-slider" data-astro-cid-q2p2pw2v> <div class="sensitivity-labels" data-astro-cid-q2p2pw2v> <span data-astro-cid-q2p2pw2v>Baja (1)</span> <span data-astro-cid-q2p2pw2v>Media (50)</span> <span data-astro-cid-q2p2pw2v>Alta (100)</span> </div> </div> </div> <!-- Botón de envío --> <div class="form-actions" data-astro-cid-q2p2pw2v> <button type="submit" class="submit-btn" id="submitBtn" data-astro-cid-q2p2pw2v> <span class="btn-text" data-astro-cid-q2p2pw2v>Analizar Imagen</span> <div class="btn-loader" style="display: none;" data-astro-cid-q2p2pw2v> <div class="spinner" data-astro-cid-q2p2pw2v></div>
+Procesando...
+</div> </button> </div> </form> </div> </div> ${renderScript($$result, "E:/CoCoA/astro/src/components/ImageUploadForm.astro?astro&type=script&index=0&lang.ts")} `;
+}, "E:/CoCoA/astro/src/components/ImageUploadForm.astro", void 0);
+
+const $$Astro$1 = createAstro();
+const $$ResultsDisplay = createComponent(($$result, $$props, $$slots) => {
+  const Astro2 = $$result.createAstro($$Astro$1, $$props, $$slots);
+  Astro2.self = $$ResultsDisplay;
+  const { result, error } = Astro2.props;
+  return renderTemplate`${result && renderTemplate`${maybeRenderHead()}<div class="results-container" data-astro-cid-liobojjq><div class="results-card" data-astro-cid-liobojjq><div class="results-header" data-astro-cid-liobojjq><h2 data-astro-cid-liobojjq>Resultados del Análisis</h2><div class="average-display" data-astro-cid-liobojjq><span class="average-label" data-astro-cid-liobojjq>Promedio de Colonias:</span><span class="average-value" data-astro-cid-liobojjq>${result.avg}</span></div></div><div class="results-content" data-astro-cid-liobojjq><!-- Imagen Overview --><div class="overview-section" data-astro-cid-liobojjq><h3 data-astro-cid-liobojjq>Vista General</h3><div class="overview-image" data-astro-cid-liobojjq><img${addAttribute(`data:image/png;base64,${result.ovv}`, "src")} alt="Vista general con cuadrantes" class="overview-img" data-astro-cid-liobojjq></div></div><!-- Detalles por cuadrante --><div class="quarters-section" data-astro-cid-liobojjq><h3 data-astro-cid-liobojjq>Detalles por Cuadrante</h3><div class="quarters-grid" data-astro-cid-liobojjq>${result.totals.quarters.map((count, index) => renderTemplate`<div class="quarter-card" data-astro-cid-liobojjq><div class="quarter-header" data-astro-cid-liobojjq><span class="quarter-title" data-astro-cid-liobojjq>Cuadrante ${index + 1}</span><span class="quarter-count" data-astro-cid-liobojjq>${count} colonias</span></div>${result.totals.imgs[index] && renderTemplate`<div class="quarter-image" data-astro-cid-liobojjq><img${addAttribute(`data:image/png;base64,${result.totals.imgs[index]}`, "src")}${addAttribute(`Cuadrante ${index + 1}`, "alt")} class="quarter-img" data-astro-cid-liobojjq></div>`}</div>`)}</div></div><!-- Estadísticas adicionales --><div class="stats-section" data-astro-cid-liobojjq><h3 data-astro-cid-liobojjq>Estadísticas</h3><div class="stats-grid" data-astro-cid-liobojjq><div class="stat-item" data-astro-cid-liobojjq><span class="stat-label" data-astro-cid-liobojjq>Total de Cuadrantes:</span><span class="stat-value" data-astro-cid-liobojjq>${result.totals.quarters.length}</span></div><div class="stat-item" data-astro-cid-liobojjq><span class="stat-label" data-astro-cid-liobojjq>Colonias Totales:</span><span class="stat-value" data-astro-cid-liobojjq>${result.totals.quarters.reduce((sum, count) => sum + count, 0)}</span></div><div class="stat-item" data-astro-cid-liobojjq><span class="stat-label" data-astro-cid-liobojjq>Máximo por Cuadrante:</span><span class="stat-value" data-astro-cid-liobojjq>${Math.max(...result.totals.quarters)}</span></div><div class="stat-item" data-astro-cid-liobojjq><span class="stat-label" data-astro-cid-liobojjq>Mínimo por Cuadrante:</span><span class="stat-value" data-astro-cid-liobojjq>${Math.min(...result.totals.quarters)}</span></div></div></div></div><div class="results-actions" data-astro-cid-liobojjq><button onclick="window.location.reload()" class="new-analysis-btn" data-astro-cid-liobojjq>
+Nuevo Análisis
+</button><button onclick="window.print()" class="print-btn" data-astro-cid-liobojjq>
+Imprimir Resultados
+</button></div></div></div>`}${error && renderTemplate`<div class="error-container" data-astro-cid-liobojjq><div class="error-card" data-astro-cid-liobojjq><div class="error-icon" data-astro-cid-liobojjq>⚠️</div><h2 data-astro-cid-liobojjq>Error en el Procesamiento</h2><p data-astro-cid-liobojjq>${error}</p><button onclick="window.location.reload()" class="retry-btn" data-astro-cid-liobojjq>
+Intentar de Nuevo
+</button></div></div>`}`;
+}, "E:/CoCoA/astro/src/components/ResultsDisplay.astro", void 0);
+
+const $$Astro = createAstro();
+const $$Index = createComponent(($$result, $$props, $$slots) => {
+  const Astro2 = $$result.createAstro($$Astro, $$props, $$slots);
+  Astro2.self = $$Index;
+  const result = Astro2.getActionResult(actions.processImage);
+  return renderTemplate`${renderComponent($$result, "Layout", $$Layout, {}, { "default": ($$result2) => renderTemplate`${result?.data ? renderTemplate`${renderComponent($$result2, "ResultsDisplay", $$ResultsDisplay, { "result": result.data.data })}` : result?.error ? renderTemplate`${renderComponent($$result2, "ResultsDisplay", $$ResultsDisplay, { "error": result.error.message })}` : renderTemplate`${renderComponent($$result2, "ImageUploadForm", $$ImageUploadForm, {})}`}` })}`;
+}, "E:/CoCoA/astro/src/pages/index.astro", void 0);
+
+const $$file = "E:/CoCoA/astro/src/pages/index.astro";
+const $$url = "";
+
+const _page = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+	__proto__: null,
+	default: $$Index,
+	file: $$file,
+	url: $$url
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const page = () => _page;
+
+export { page };

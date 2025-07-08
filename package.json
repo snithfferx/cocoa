@@ -17,6 +17,8 @@
     "deploy": "npm install && npm run build && npm run start"
   },
   "dependencies": {
+    "@astrojs/netlify": "^6.4.1",
+    "@astrojs/node": "^9.3.0",
     "astro": "^5.11.0",
     "canvas": "^3.1.2",
     "jimp": "^1.6.0",
@@ -27,7 +29,6 @@
   "extensionDependencies": {
     "@eslint/js": "^9.29.0",
     "@types/node": "^24.0.3",
-    "@astrojs/node": "^9.3.0",
     "@jimp/types": "^1.6.0",
     "@types/multer": "^2.0.0",
     "eslint-config-standard": "^17.1.0",
@@ -35,12 +36,12 @@
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-n": "^17.20.0",
     "eslint-plugin-promise": "^7.2.1",
-		"prettier": "^3.5.3",
-		"prettier-plugin-astro": "0.14.1",
-		"standard": "^17.1.2",
-		"typescript-eslint": "^8.34.1"
+    "prettier": "^3.5.3",
+    "prettier-plugin-astro": "0.14.1",
+    "standard": "^17.1.2",
+    "typescript-eslint": "^8.34.1"
   },
-	"eslintConfig": {
-		"extends": "standard"
-	}
+  "eslintConfig": {
+    "extends": "standard"
+  }
 }
