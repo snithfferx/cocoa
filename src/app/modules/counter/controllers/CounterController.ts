@@ -176,18 +176,89 @@ export class CounterController {
       const qh = Math.floor(h / quarters);
       const qw = Math.floor(w / quarters);
 
+      // Colores para las líneas y texto
+      const lineColor = 0xFF0000FF; // Rojo brillante
+      const textBackgroundColor = 0x000000AA; // Negro semi-transparente
+      const lineWidth = 3;
+
+      // Dibujar rectángulo
+      // Líneas verticales
+      for (let i = 1; i < quarters; i++) {
+        const x = i * qw;
+        for (let y = 0; y < h; y++) {
+          for (let thickness = 0; thickness < lineWidth; thickness++) {
+            if (x + thickness < w) {
+              jimpImage.setPixelColor(lineColor, x + thickness, y);
+            }
+          }
+        }
+      }
+
+      // Líneas horizontales
+      for (let i = 1; i < quarters; i++) {
+        const y = i * qh;
+        for (let x = 0; x < w; x++) {
+          for (let thickness = 0; thickness < lineWidth; thickness++) {
+            if (y + thickness < h) {
+              jimpImage.setPixelColor(lineColor, x, y + thickness);
+            }
+          }
+        }
+      }
+
+      // Dibujar borde exterior
+      // Borde superior e inferior
+      for (let x = 0; x < w; x++) {
+        for (let thickness = 0; thickness < lineWidth; thickness++) {
+          jimpImage.setPixelColor(lineColor, x, thickness); // Superior
+          if (h - 1 - thickness >= 0) {
+            jimpImage.setPixelColor(lineColor, x, h - 1 - thickness); // Inferior
+          }
+        }
+      }
+
+      // Borde izquierdo y derecho
+      for (let y = 0; y < h; y++) {
+        for (let thickness = 0; thickness < lineWidth; thickness++) {
+          jimpImage.setPixelColor(lineColor, thickness, y); // Izquierdo
+          if (w - 1 - thickness >= 0) {
+            jimpImage.setPixelColor(lineColor, w - 1 - thickness, y); // Derecho
+          }
+        }
+      }
+      
+      // Agregar texto con el total en cada cuadrante
       let idx = 0;
       for (let i = 0; i < quarters; i++) {
         for (let j = 0; j < quarters; j++) {
           const x = j * qw;
           const y = i * qh;
 
-          // Dibujar rectángulo (simulado con líneas)
-          // En una implementación real, usarías una librería de dibujo más avanzada
-
           // Agregar texto con el total
           const texto = totals[idx].toString();
-          jimpImage.print({ x: x + 5, y: y + 5, text: texto, font: font });
+
+          // Calcular posición centrada del texto en el cuadrante
+          const textX = x + Math.floor(qw / 2) - (texto.length * 4); // Aproximación del ancho del texto
+          const textY = y + Math.floor(qh / 2) - 8; // Centrar verticalmente
+          
+          // Crear un fondo semi-transparente para el texto
+          const backgroundPadding = 8;
+          const backgroundWidth = texto.length * 8 + backgroundPadding * 2;
+          const backgroundHeight = 16 + backgroundPadding;
+
+          // Dibujar fondo semi-transparente
+          for (let bgY = textY - backgroundPadding; bgY < textY + backgroundHeight; bgY++) {
+            for (let bgX = textX - backgroundPadding; bgX < textX + backgroundWidth; bgX++) {
+              if (bgX >= x && bgX < x + qw && bgY >= y && bgY < y + qh && 
+                  bgX >= 0 && bgX < w && bgY >= 0 && bgY < h) {
+                jimpImage.setPixelColor(textBackgroundColor, bgX, bgY);
+              }
+            }
+          }
+
+          // Dibujar texto
+          jimpImage.print({ x: Math.max(x + 5, textX), y: Math.max(y + 5, textY), text: texto, font: font });
+          
           idx++;
         }
       }
