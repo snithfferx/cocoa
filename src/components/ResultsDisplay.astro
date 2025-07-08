@@ -87,7 +87,7 @@ const { result, error } = Astro.props;
       </div>
 
       <div class="results-actions">
-        <button onclick="window.location.reload()" class="new-analysis-btn">
+        <button onclick="window.location.href='/' " class="new-analysis-btn">
           Nuevo Análisis
         </button>
         <button onclick="window.print()" class="print-btn">
@@ -116,7 +116,7 @@ const { result, error } = Astro.props;
   .error-container {
     min-height: 100vh;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 20px;
+    padding: 10px;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   }
 
@@ -125,35 +125,37 @@ const { result, error } = Astro.props;
     background: white;
     border-radius: 20px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-    padding: 40px;
+    padding: 30px;
     max-width: 1200px;
     margin: 0 auto;
+    max-height: 95vh;
+    overflow-y: auto;
   }
 
   .results-header {
     text-align: center;
-    margin-bottom: 40px;
-    padding-bottom: 20px;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
     border-bottom: 2px solid #e2e8f0;
   }
 
   .results-header h2 {
-    font-size: 2.2rem;
+    font-size: 1.8rem;
     font-weight: 700;
     color: #1a202c;
-    margin: 0 0 20px 0;
+    margin: 0 0 15px 0;
   }
 
   .average-display {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 15px;
+    gap: 10px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    padding: 20px 30px;
+    padding: 15px 20px;
     border-radius: 15px;
-    font-size: 1.3rem;
+    font-size: 1.1rem;
   }
 
   .average-label {
@@ -162,29 +164,29 @@ const { result, error } = Astro.props;
 
   .average-value {
     font-weight: 700;
-    font-size: 1.8rem;
+    font-size: 1.5rem;
   }
 
   .results-content {
     display: grid;
-    gap: 40px;
+    gap: 25px;
   }
 
   .overview-section,
   .quarters-section,
   .stats-section {
     background: #f7fafc;
-    padding: 30px;
+    padding: 20px;
     border-radius: 15px;
   }
 
   .overview-section h3,
   .quarters-section h3,
   .stats-section h3 {
-    font-size: 1.4rem;
+    font-size: 1.2rem;
     font-weight: 600;
     color: #2d3748;
-    margin: 0 0 20px 0;
+    margin: 0 0 15px 0;
   }
 
   .overview-image {
@@ -200,14 +202,14 @@ const { result, error } = Astro.props;
 
   .quarters-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
   }
 
   .quarter-card {
     background: white;
     border-radius: 12px;
-    padding: 20px;
+    padding: 15px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
     transition: transform 0.2s;
   }
@@ -220,20 +222,21 @@ const { result, error } = Astro.props;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
+    margin-bottom: 12px;
   }
 
   .quarter-title {
     font-weight: 600;
     color: #4a5568;
+    font-size: 0.9rem;
   }
 
   .quarter-count {
     background: #667eea;
     color: white;
-    padding: 4px 12px;
+    padding: 3px 10px;
     border-radius: 20px;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     font-weight: 600;
   }
 
@@ -243,20 +246,20 @@ const { result, error } = Astro.props;
 
   .quarter-img {
     width: 100%;
-    height: 150px;
+    height: 120px;
     object-fit: cover;
     border-radius: 8px;
   }
 
   .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
   }
 
   .stat-item {
     background: white;
-    padding: 20px;
+    padding: 15px;
     border-radius: 12px;
     text-align: center;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
@@ -264,14 +267,14 @@ const { result, error } = Astro.props;
 
   .stat-label {
     display: block;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     color: #718096;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
 
   .stat-value {
     display: block;
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     font-weight: 700;
     color: #2d3748;
   }
@@ -279,22 +282,22 @@ const { result, error } = Astro.props;
   .results-actions {
     display: flex;
     justify-content: center;
-    gap: 20px;
-    margin-top: 40px;
-    padding-top: 30px;
+    gap: 15px;
+    margin-top: 25px;
+    padding-top: 20px;
     border-top: 2px solid #e2e8f0;
   }
 
   .new-analysis-btn,
   .print-btn,
   .retry-btn {
-    padding: 12px 30px;
+    padding: 10px 25px;
     border-radius: 10px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
     border: none;
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
 
   .new-analysis-btn {
@@ -344,21 +347,94 @@ const { result, error } = Astro.props;
   @media (max-width: 768px) {
     .results-card,
     .error-card {
-      padding: 20px;
-      margin: 10px;
+      padding: 15px;
+      margin: 5px;
+      border-radius: 15px;
+    }
+
+    .results-header {
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+    }
+
+    .results-header h2 {
+      font-size: 1.5rem;
+      margin-bottom: 12px;
+    }
+
+    .average-display {
+      gap: 8px;
+      padding: 12px 15px;
+      font-size: 1rem;
+      flex-direction: column;
+    }
+
+    .average-value {
+      font-size: 1.3rem;
+    }
+
+    .results-content {
+      gap: 20px;
+    }
+
+    .overview-section,
+    .quarters-section,
+    .stats-section {
+      padding: 15px;
+    }
+
+    .overview-section h3,
+    .quarters-section h3,
+    .stats-section h3 {
+      font-size: 1.1rem;
+      margin-bottom: 12px;
     }
 
     .quarters-grid {
       grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .quarter-card {
+      padding: 12px;
+    }
+
+    .quarter-img {
+      height: 100px;
     }
 
     .stats-grid {
       grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .stat-item {
+      padding: 12px;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-size: 1.3rem;
     }
 
     .results-actions {
       flex-direction: column;
       align-items: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .new-analysis-btn,
+    .print-btn,
+    .retry-btn {
+      padding: 12px 20px;
+      font-size: 0.9rem;
+      width: 100%;
+      max-width: 200px;
     }
   }
 </style>
