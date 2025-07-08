@@ -31,7 +31,7 @@ export class CounterController {
           if (!cut) throw new Error('Error procesando la imagen');
 
           // Guardar el cuadrante de imagen en la carpeta del usuario
-          await this.saveImage(cut, name, i, j, user);
+          // await this.saveImage(cut, name, i, j, user);
 
           // Contar colonias por cuadrante
           const totalColonies = await this.countColonies(cut, quarters, sensitivity);
@@ -226,7 +226,7 @@ export class CounterController {
           }
         }
       }
-      
+
       // Agregar texto con el total en cada cuadrante
       let idx = 0;
       for (let i = 0; i < quarters; i++) {
