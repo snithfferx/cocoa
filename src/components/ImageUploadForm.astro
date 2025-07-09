@@ -10,33 +10,6 @@ import { actions } from "astro:actions";
 	  </div>
   
 	  <form method="POST" action={actions.processImage} enctype="multipart/form-data" class="upload-form">
-		<!-- Información del usuario -->
-		<div class="form-section">
-		  <h3>Información del Usuario</h3>
-		  <div class="form-row">
-			<div class="form-group">
-			  <label for="userName">Nombre:</label>
-			  <input 
-				type="text" 
-				id="userName" 
-				name="userName" 
-				required 
-				placeholder="Tu nombre"
-			  />
-			</div>
-			<div class="form-group">
-			  <label for="userEmail">Email:</label>
-			  <input 
-				type="email" 
-				id="userEmail" 
-				name="userEmail" 
-				required 
-				placeholder="tu@email.com"
-			  />
-			</div>
-		  </div>
-		</div>
-  
 		<!-- Configuración del análisis -->
 		<div class="form-section">
 		  <h3>Configuración del Análisis</h3>

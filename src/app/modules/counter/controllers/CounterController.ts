@@ -5,7 +5,7 @@ import { Jimp, loadFont } from 'jimp';
 import { SANS_16_BLACK } from 'jimp/fonts';
 
 export class CounterController {
-  async uploadImage(file: any, sensitivity: number, name: string, quarters: number = 2, user: User) {
+  async uploadImage(file: any, sensitivity: number, name: string, quarters: number = 2) {
     try {
       // Convertir imagen a escala de grises y mejorar contraste
       const imgGrayScale = await this.setGrays(file);
@@ -62,7 +62,8 @@ export class CounterController {
           totals: {
             quarters: totalColoniesByQuarter,
             imgs: quarterImage
-          }
+          },
+          name: name
         }
       };
     } catch (error) {
@@ -149,17 +150,24 @@ export class CounterController {
 
   async countColonies(cut: Buffer, quarters: number = 2, sensitivity: number = 50): Promise<{ total: number, img: string }> {
     try {
-      // Aplicar umbralización adaptativa para mejorar la detección de colonias
-      const thresholdedImage = await ImageProcessor.applyThreshold(cut, sensitivity);
-
-      // Aquí implementarías la lógica de detección de contornos
-      // Por ahora, retornamos un valor simulado
-      const colonies = Math.floor(Math.random() * 50) + 10; // Valor simulado
-
+      // dividir corte en 4 cuadrantes
+      const imgHeightWidth = await this.getImageHL(cut);
+      const heightQuarter = Math.floor(imgHeightWidth.height / quarters);
+      const widthQuarter = Math.floor(imgHeightWidth.width / quarters);
+      const quarterTotals:number[] = [];
+      for (let i = 0; i < quarters; i++) {
+        for (let j = 0; j < quarters; j++) {
+          const quarterCut = await this.cropImageQuarter(cut, j * widthQuarter, i * heightQuarter, widthQuarter, heightQuarter);
+          if (!quarterCut) throw new Error('Error procesando la imagen');
+          const total = await this.countColoniesByContours(quarterCut, sensitivity);
+          quarterTotals.push(total);
+        }
+      }
+      const colonySumary = quarterTotals.reduce((acc, curr) => acc + curr, 0);
       // Convertir imagen a base64 para overview
-      const overview = thresholdedImage.toString('base64');
+      const overview = cut.toString('base64');
 
-      return { total: colonies, img: overview };
+      return { total: colonySumary, img: overview };
     } catch (error) {
       if (error instanceof Error) throw new Error(`Error contando colonias: ${error.message}`);
       return { total: 0, img: '' };
@@ -268,6 +276,16 @@ export class CounterController {
     } catch (error) {
       if (error instanceof Error) throw new Error(`Error creando imagen overview: ${error.message}`);
       return '';
+    }
+  }
+
+  async countColoniesByContours(image: Buffer, sensitivity: number = 50): Promise<number> {
+    try {
+      const contours = await ImageProcessor.findContours(image, sensitivity);
+      return contours;
+    } catch (error) {
+      if (error instanceof Error) throw new Error(`Error contando colonias por contornos: ${error.message}`);
+      return 0;
     }
   }
 }

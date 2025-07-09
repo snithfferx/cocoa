@@ -1,13 +1,14 @@
 ---
 interface Props {
-  result?: {
+  result: {
     avg: number;
     ovv: string;
     totals: {
       quarters: number[];
       imgs: string[];
     };
-  };
+    name: string;
+  }|null;
   error?: string;
 }
 
@@ -98,7 +99,7 @@ const { result, error } = Astro.props;
   </div>
 )}
 
-{error && (
+{!result || error && (
   <div class="error-container">
     <div class="error-card">
       <div class="error-icon">⚠️</div>

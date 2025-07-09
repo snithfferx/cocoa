@@ -1,4 +1,5 @@
 import { Jimp } from 'jimp';
+// import * as cv from 'opencv4nodejs'
 
 export class ImageProcessor {
   /**
@@ -121,18 +122,20 @@ export class ImageProcessor {
   static async applyThreshold(imageBuffer: Buffer, threshold: number = 128): Promise<Buffer> {
     try {
       const image = await Jimp.read(imageBuffer);
-
-      image.scan(0, 0, image.bitmap.width, image.bitmap.height, function (x, y, idx) {
+      const bitmap = image.bitmap;
+      const height = bitmap.height;
+      const width = bitmap.width;
+      image.scan(0, 0, width, height, function (x, y, idx) {
         // Obtener el valor de gris (ya que la imagen está en escala de grises, R=G=B)
-        const gray = this.bitmap.data[idx];
+        const gray = bitmap.data[idx];
 
         // Aplicar umbralización
         const binaryValue = gray > threshold ? 255 : 0;
 
         // Asignar el valor binario a todos los canales
-        this.bitmap.data[idx] = binaryValue;     // Red
-        this.bitmap.data[idx + 1] = binaryValue; // Green
-        this.bitmap.data[idx + 2] = binaryValue; // Blue
+        bitmap.data[idx] = binaryValue;     // Red
+        bitmap.data[idx + 1] = binaryValue; // Green
+        bitmap.data[idx + 2] = binaryValue; // Blue
         // Alpha channel permanece sin cambios
       });
 
@@ -142,5 +145,25 @@ export class ImageProcessor {
       console.error(error);
       throw error;
     }
+  }
+
+  /**
+   * Encuentra contornos en una imagen binarizada
+   * @param imageBuffer - Buffer de la imagen en escala de grises
+   * @returns Promise<number> - Número de contornos encontrados
+   */
+  static async findContours(imageBuffer: Buffer, sensitivity: number = 50): Promise<number> {
+    // try {
+    //   const imagThresholded = await this.applyThreshold(imageBuffer, sensitivity);
+    //   const image = cv.imread(imagThresholded.toString());
+    //   const edges = image.canny(sensitivity, sensitivity * 2);
+    //   const contours = edges.findContours(cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+    //   return contours.length;
+    // } catch (error) {
+    //   if (error instanceof Error) throw new Error(`Error encontrando contornos: ${error.message}`);
+    //   console.error(error);
+    //   throw error;
+    // }
+    return 0;
   }
 }
