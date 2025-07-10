@@ -7,13 +7,11 @@ import { SANS_16_BLACK } from 'jimp/fonts';
 export class CounterController {
   async uploadImage(file: any, sensitivity: number, name: string, quarters: number = 2) {
     try {
-      console.log('Iniciando uploadImage con:', { sensitivity, name, quarters });
       // Convertir imagen a escala de grises y mejorar contraste
       const imgGrayScale = await this.setGrays(file);
       if (!imgGrayScale) throw new Error('Error creando la imagen a escala de grises');
       // Obtener dimensiones de la imagen
       const imgHeightWidth = await this.getImageHL(imgGrayScale);
-      // console.info("sizes: ", imgHeightWidth);
       const heightQuarter = Math.floor(imgHeightWidth.height / quarters);
       const widthQuarter = Math.floor(imgHeightWidth.width / quarters);
       const totalColoniesByQuarter: number[] = [];
@@ -50,8 +48,6 @@ export class CounterController {
           }
         }
       }
-      console.log("Colonies: ", totalColoniesByQuarter);
-      console.log("Quarter references: ",quartersOQ);
 
       // Sumatoria de totales
       const colonies = totalColoniesByQuarter.reduce((acc, curr) => acc + curr, 0);
@@ -60,7 +56,6 @@ export class CounterController {
       const average = Math.ceil(colonies / totalColoniesByQuarter.length);
 
       // Crear imagen con cuadrantes para retornar
-      // console.info("Total by colonie quarters: ",totalColoniesByQuarter);
       const overviewImg64 = await this.overviewImage(imgGrayScale, quarters, totalColoniesByQuarter);
 
       const response = {
@@ -76,7 +71,6 @@ export class CounterController {
           name: name
         }
       };
-      console.log('Respuesta de uploadImage:', JSON.stringify({ status: response.status }));
       return response;
     } catch (error) {
       console.error('Error en uploadImage:', error);
@@ -86,7 +80,6 @@ export class CounterController {
           data: null,
           message: `Error procesando imagen: ${error.message}`
         };
-        console.log('Respuesta de error:', JSON.stringify({ status: errorResponse.status, message: errorResponse.message }));
         return errorResponse;
       }
       console.error('Error desconocido:', error);
@@ -166,7 +159,6 @@ export class CounterController {
     try {
       // dividir corte en 4 cuadrantes
       const imgHeightWidth = await this.getImageHL(cut);
-      // console.info("Cut Size: ", imgHeightWidth);
       const hq = Math.floor(imgHeightWidth.height / 2);
       const wq = Math.floor(imgHeightWidth.width / 2);
       const totalByQuarters:number[] = [];
@@ -176,10 +168,7 @@ export class CounterController {
           const quarterCut = await this.cropImageQuarter(cut, j * wq, i * hq, wq, hq);
           if (!quarterCut) throw new Error('countColonies_Error: La imagen no se pudo cortar.');
           const total = await this.countColoniesByContours(quarterCut, sensitivity);
-          // console.log("quarter: x,y,w,h",j,i,wq,hq);
-          // console.info("total",total);
           if (total) {
-            // console.info("total:", total.colonies);
             totalByQuarters.push(total.colonies);
             quarterOverviews.push(total.reference);
           }
@@ -187,7 +176,6 @@ export class CounterController {
       }
       const colonySumary = totalByQuarters.reduce((acc, curr) => acc + curr);
       // Convertir imagen a base64 para overview
-      // console.info("Total by quarters: ",totalByQuarters);
       const overview = await this.overviewImage(cut,2,totalByQuarters);
 
       return { total: colonySumary, quarter: overview, references:{ totals:totalByQuarters,images:quarterOverviews} };
@@ -206,8 +194,6 @@ export class CounterController {
       const w = jimpImage.width;
       const qh = Math.floor(h / quarters);
       const qw = Math.floor(w / quarters);
-      // console.log("qh: ",qh);
-      // console.log("qw: ",qw);
       // Colores para las líneas y texto
       const lineColor = 0xFF0000FF; // Rojo brillante
       const textBackgroundColor = 0x000000AA; // Negro semi-transparente
@@ -267,7 +253,6 @@ export class CounterController {
           const y = i * qh;
 
           // Agregar texto con el total
-          // console.log("Totales en"+idx+": ",totals[idx]);
           const texto = totals[idx].toString();
 
           // Calcular posición centrada del texto en el cuadrante

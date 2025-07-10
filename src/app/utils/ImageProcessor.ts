@@ -161,45 +161,32 @@ export class ImageProcessor {
     try {
       // Asegurarse de que OpenCV esté inicializado correctamente
       const cv = await cvReadyPromise;
-      // console.info("Inializing CV");
       // Crear imagen
       const image = new Image();
-      // console.info("Creating new Image");
       // Agregar buffer
       image.src = imageBuffer;
-      // console.info("Adding buffer to image");
       // Crear lienzo de imagen
       const imageCanvas = createCanvas(image.width,image.height);
-      // console.info("Creating canvas");
       // Obtener el contexto
       const context = imageCanvas.getContext('2d');
-      // console.info("Getting context from image");
       // Dibujar imagen
       context.drawImage(image,0,0);
-      // console.info("Drawing imagein canvas");
       // Obtener datos de imagen
       const imageData = context.getImageData(0,0,image.width,image.height)
-      // console.info("Getting Image data");
       // Convertir en Mat
       const source = cv.matFromImageData(imageData);
-      // console.info("Creating vectors from image data");
       const gray = new cv.Mat();
       const edges = new cv.Mat();
       const contours = new cv.MatVector();
       const hierarchy = new cv.Mat();
       // Procesarmiento
       cv.cvtColor(source,gray,cv.COLOR_RGBA2GRAY,0);
-      // console.info("Convert to grayscale");
       cv.Canny(gray,edges,sensitivity,150);
-      // console.info("MArking edges");
       cv.findContours(edges,contours,hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
-      // console.info("Finding contours");
       let coloniasValidas = 0;
-      // console.log("Contornos: ",contours.size());
       for (let i = 0; i < contours.size(); ++i) {
         const contorno = contours.get(i);
         const area = cv.contourArea(contorno);
-        // console.info("Contour Area", area);
         if (area > 20) { // Ajusta el umbral según tu imagen
           coloniasValidas++;
         }
