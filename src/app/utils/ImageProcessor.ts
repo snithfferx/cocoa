@@ -1,5 +1,8 @@
 import { Jimp } from 'jimp';
-// import * as cv from 'opencv4nodejs'
+// import cv from "@techstark/opencv-js"
+import cvReadyPromise from "@techstark/opencv-js";
+// import * as cv from '@techstark/opencv-js';
+import {createCanvas, Image, ImageData} from 'canvas';
 
 export class ImageProcessor {
   /**
@@ -11,11 +14,11 @@ export class ImageProcessor {
   static async convertToGrayscaleAndEnhanceContrast(
     imageBuffer: Buffer | string,
     contrastLevel: number = 0.3
-  ): Promise<Buffer | undefined> {
+  ): Promise<Buffer | null> {
     try {
       // Cargar la imagen usando Jimp
       const image = await Jimp.read(imageBuffer);
-
+      // if (!image) throw new Error("CTGaE_Error: No se pudo leer la imagen.");
       // Convertir a escala de grises
       image.greyscale();
 
@@ -27,11 +30,12 @@ export class ImageProcessor {
 
       // Convertir de vuelta a buffer
       const processedBuffer = await image.getBuffer("image/png"); //.getBufferAsync(MIME_PNG);
-
+      // if (processedBuffer) throw new Error("CTGaE_Error: No se pudo crear imagen png.");
       return processedBuffer;
     } catch (error) {
-      if (error instanceof Error) throw new Error(`Error procesando la imagen: ${error.message}`);
+      if (error instanceof Error) throw new Error(`CTGaE_Error procesando la imagen: ${error.message}`);
       console.error(error);
+      return null;
     }
   }
 
@@ -41,7 +45,7 @@ export class ImageProcessor {
    * @param contrastLevel - Nivel de contraste (1.0 = sin cambios, >1.0 = más contraste)
    * @returns Promise<ImageData> - Datos de la imagen procesada
    */
-  static async processImageWithCanvas(
+  /* static async processImageWithCanvas(
     imageFile: File,
     contrastLevel: number = 1.5
   ): Promise<ImageData> {
@@ -55,8 +59,6 @@ export class ImageProcessor {
       img.onload = () => {
         canvas.width = img.width;
         canvas.height = img.height;
-
-        // Dibujar la imagen en el canvas
         ctx.drawImage(img, 0, 0);
 
         // Obtener los datos de la imagen
@@ -92,7 +94,7 @@ export class ImageProcessor {
       img.onerror = () => reject(new Error('Error cargando la imagen'));
       img.src = URL.createObjectURL(imageFile);
     });
-  }
+  } */
 
   /**
    * Función para obtener las dimensiones de una imagen
@@ -102,6 +104,8 @@ export class ImageProcessor {
   static async getImageDimensions(imageBuffer: Buffer): Promise<{ width: number, height: number }> {
     try {
       const image = await Jimp.read(imageBuffer);
+      if (!image) throw new Error("getImageDimensions_Error: No se puede leer la imagen");
+      
       return {
         width: image.width,
         height: image.height
@@ -150,20 +154,83 @@ export class ImageProcessor {
   /**
    * Encuentra contornos en una imagen binarizada
    * @param imageBuffer - Buffer de la imagen en escala de grises
-   * @returns Promise<number> - Número de contornos encontrados
+   * @param sensitivity - Sensibilidad de detección
+   * @returns Promise<total:number, image:Buffer> - Número de contornos encontrados y su imagen
    */
-  static async findContours(imageBuffer: Buffer, sensitivity: number = 50): Promise<number> {
-    // try {
-    //   const imagThresholded = await this.applyThreshold(imageBuffer, sensitivity);
-    //   const image = cv.imread(imagThresholded.toString());
-    //   const edges = image.canny(sensitivity, sensitivity * 2);
-    //   const contours = edges.findContours(cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
-    //   return contours.length;
-    // } catch (error) {
-    //   if (error instanceof Error) throw new Error(`Error encontrando contornos: ${error.message}`);
-    //   console.error(error);
-    //   throw error;
-    // }
-    return 0;
+  static async findContours(imageBuffer: Buffer, sensitivity: number = 50): Promise<{total:number, image:Buffer}|null> {
+    try {
+      // Asegurarse de que OpenCV esté inicializado correctamente
+      const cv = await cvReadyPromise;
+      // console.info("Inializing CV");
+      // Crear imagen
+      const image = new Image();
+      // console.info("Creating new Image");
+      // Agregar buffer
+      image.src = imageBuffer;
+      // console.info("Adding buffer to image");
+      // Crear lienzo de imagen
+      const imageCanvas = createCanvas(image.width,image.height);
+      // console.info("Creating canvas");
+      // Obtener el contexto
+      const context = imageCanvas.getContext('2d');
+      // console.info("Getting context from image");
+      // Dibujar imagen
+      context.drawImage(image,0,0);
+      // console.info("Drawing imagein canvas");
+      // Obtener datos de imagen
+      const imageData = context.getImageData(0,0,image.width,image.height)
+      // console.info("Getting Image data");
+      // Convertir en Mat
+      const source = cv.matFromImageData(imageData);
+      // console.info("Creating vectors from image data");
+      const gray = new cv.Mat();
+      const edges = new cv.Mat();
+      const contours = new cv.MatVector();
+      const hierarchy = new cv.Mat();
+      // Procesarmiento
+      cv.cvtColor(source,gray,cv.COLOR_RGBA2GRAY,0);
+      // console.info("Convert to grayscale");
+      cv.Canny(gray,edges,sensitivity,150);
+      // console.info("MArking edges");
+      cv.findContours(edges,contours,hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+      // console.info("Finding contours");
+      let coloniasValidas = 0;
+      // console.log("Contornos: ",contours.size());
+      for (let i = 0; i < contours.size(); ++i) {
+        const contorno = contours.get(i);
+        const area = cv.contourArea(contorno);
+        // console.info("Contour Area", area);
+        if (area > 20) { // Ajusta el umbral según tu imagen
+          coloniasValidas++;
+        }
+      }
+      // Dibujando contornos
+      for (let i = 0; i < contours.size(); ++i) {
+        cv.drawContours(source, contours, i, new cv.Scalar(255, 0, 0, 255), 2);
+      }
+      // Convertir resultado en imagen
+      const result = createCanvas(source.cols, source.rows);
+      const resultContext = result.getContext('2d');
+      
+      // Crear una ImageData a partir de la matriz source
+      const imgData = new ImageData(
+        new Uint8ClampedArray(source.data),
+        source.cols,
+        source.rows
+      );
+      
+      // Dibujar la ImageData en el canvas
+      resultContext.putImageData(imgData, 0, 0);
+      const resultBuffer = result.toBuffer();
+
+      // Liberar memoria
+      source.delete(); gray.delete(); edges.delete(); contours.delete(); hierarchy.delete();
+      return {total: coloniasValidas, image:resultBuffer};
+    } catch (error) {
+      if (error instanceof Error) throw new Error(`Error encontrando contornos: ${error.message}`);
+      console.error(error);
+      // throw error;
+      return null;
+    }
   }
 }

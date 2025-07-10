@@ -7,15 +7,21 @@ import { SANS_16_BLACK } from 'jimp/fonts';
 export class CounterController {
   async uploadImage(file: any, sensitivity: number, name: string, quarters: number = 2) {
     try {
+      console.log('Iniciando uploadImage con:', { sensitivity, name, quarters });
       // Convertir imagen a escala de grises y mejorar contraste
       const imgGrayScale = await this.setGrays(file);
-      if (!imgGrayScale) throw new Error('Error procesando la imagen');
+      if (!imgGrayScale) throw new Error('Error creando la imagen a escala de grises');
       // Obtener dimensiones de la imagen
       const imgHeightWidth = await this.getImageHL(imgGrayScale);
+      // console.info("sizes: ", imgHeightWidth);
       const heightQuarter = Math.floor(imgHeightWidth.height / quarters);
       const widthQuarter = Math.floor(imgHeightWidth.width / quarters);
       const totalColoniesByQuarter: number[] = [];
-      const quarterImage = [];
+      const quarterImage:string[] = [];
+      const quartersOQ:{
+        totals: number[];
+        images: Buffer<ArrayBufferLike>[];
+      }[] = [];
 
       // Iterar por cada cuadrante de la imagen
       for (let i = 0; i < quarters; i++) {
@@ -28,68 +34,79 @@ export class CounterController {
             widthQuarter,
             heightQuarter
           );
-          if (!cut) throw new Error('Error procesando la imagen');
+          if (!cut) throw new Error('Error cortando la imagen');
 
           // Guardar el cuadrante de imagen en la carpeta del usuario
           // await this.saveImage(cut, name, i, j, user);
 
           // Contar colonias por cuadrante
-          const totalColonies = await this.countColonies(cut, quarters, sensitivity);
-
+          const totalColonies = await this.countColonies(cut, sensitivity);
+          // if (!totalColonies) throw new Error('Error contando las colonias');
           // Agregar total de colonias al array totalColoniesByQuarter
-          totalColoniesByQuarter.push(totalColonies.total);
-          quarterImage.push(totalColonies.img);
+          if (totalColonies) {
+            totalColoniesByQuarter.push(totalColonies.total);
+            quarterImage.push(totalColonies.quarter);
+            quartersOQ.push(totalColonies.references);
+          }
         }
       }
+      console.log("Colonies: ", totalColoniesByQuarter);
+      console.log("Quarter references: ",quartersOQ);
 
       // Sumatoria de totales
-      let colonies = 0;
-      totalColoniesByQuarter.forEach(item => {
-        colonies += item;
-      });
+      const colonies = totalColoniesByQuarter.reduce((acc, curr) => acc + curr, 0);
 
       // Promedio
       const average = Math.ceil(colonies / totalColoniesByQuarter.length);
 
       // Crear imagen con cuadrantes para retornar
+      // console.info("Total by colonie quarters: ",totalColoniesByQuarter);
       const overviewImg64 = await this.overviewImage(imgGrayScale, quarters, totalColoniesByQuarter);
 
-      return {
+      const response = {
         status: 'ok',
         data: {
           avg: average,
-          ovv: overviewImg64,
+          ovi: overviewImg64,
           totals: {
-            quarters: totalColoniesByQuarter,
-            imgs: quarterImage
+            quarters: quartersOQ,
+            values: totalColoniesByQuarter,
+            images: quarterImage
           },
           name: name
         }
       };
+      console.log('Respuesta de uploadImage:', JSON.stringify({ status: response.status }));
+      return response;
     } catch (error) {
+      console.error('Error en uploadImage:', error);
       if (error instanceof Error) {
-        return {
+        const errorResponse = {
           status: 'error',
           data: null,
           message: `Error procesando imagen: ${error.message}`
         };
+        console.log('Respuesta de error:', JSON.stringify({ status: errorResponse.status, message: errorResponse.message }));
+        return errorResponse;
       }
-      console.error(error);
+      console.error('Error desconocido:', error);
       throw error;
     }
   }
 
-  async setGrays(file: Buffer | string): Promise<Buffer | undefined> {
+  async setGrays(file: Buffer | string): Promise<Buffer | null> {
     try {
       // Convertir imagen a escala de grises y mejorar contraste
-      const processedImage = await ImageProcessor.convertToGrayscaleAndEnhanceContrast(file, 0.4);
+      const processedImage = await ImageProcessor.convertToGrayscaleAndEnhanceContrast(file, 0.1);
+      // if (!processedImage) throw new Error("setGrays_Error: La imagen no se pudo convertir.");
       return processedImage;
     } catch (error) {
       if (error instanceof Error) {
-        throw new Error(`Error convirtiendo a escala de grises: ${error.message}`);
+        throw new Error(`setGrays_Error convirtiendo a escala de grises: ${error.message}`);
       }
       console.error(error);
-      throw error;
+      // throw error;
+      return null;
     }
   }
 
@@ -106,18 +123,15 @@ export class CounterController {
     }
   }
 
-  async cropImageQuarter(
-    imageBuffer: Buffer,
-    x: number,
-    y: number,
-    width: number,
-    height: number
-  ): Promise<Buffer | null> {
+  async cropImageQuarter(imageBuffer: Buffer,x: number,y: number,w: number,h: number): Promise<Buffer | null> {
     try {
       // const Jimp = await import('jimp');
       const image = await Jimp.read(imageBuffer);
-      const cropped = image.crop({ x, y, w: width, h: height });
-      return await cropped.getBuffer('image/png');  //Async(Jimp.default.MIME_PNG);
+      // if (!image) throw new Error("cropImageQuarter_Error: No se puede leer la imagen.");
+      const cropped = image.crop({ x, y, w, h });
+      const buffer = await cropped.getBuffer('image/png');  //Async(Jimp.default.MIME_PNG);
+      // if (!buffer) throw new Error("cropImageQuarter_Error: No se pudo convertir la imagen")
+      return buffer;
     } catch (error) {
       if (error instanceof Error) throw new Error(`Error recortando imagen: ${error.message}`);
       return null;
@@ -148,29 +162,38 @@ export class CounterController {
     }
   }
 
-  async countColonies(cut: Buffer, quarters: number = 2, sensitivity: number = 50): Promise<{ total: number, img: string }> {
+  async countColonies(cut: Buffer, sensitivity: number = 50): Promise<{ total: number, quarter: string,references:{ totals: number[], images: Buffer<ArrayBufferLike>[] } }|null> {
     try {
       // dividir corte en 4 cuadrantes
       const imgHeightWidth = await this.getImageHL(cut);
-      const heightQuarter = Math.floor(imgHeightWidth.height / quarters);
-      const widthQuarter = Math.floor(imgHeightWidth.width / quarters);
-      const quarterTotals:number[] = [];
-      for (let i = 0; i < quarters; i++) {
-        for (let j = 0; j < quarters; j++) {
-          const quarterCut = await this.cropImageQuarter(cut, j * widthQuarter, i * heightQuarter, widthQuarter, heightQuarter);
-          if (!quarterCut) throw new Error('Error procesando la imagen');
+      // console.info("Cut Size: ", imgHeightWidth);
+      const hq = Math.floor(imgHeightWidth.height / 2);
+      const wq = Math.floor(imgHeightWidth.width / 2);
+      const totalByQuarters:number[] = [];
+      const quarterOverviews:Buffer<ArrayBufferLike>[] = [];
+      for (let i = 0; i < 2; i++) {
+        for (let j = 0; j < 2; j++) {
+          const quarterCut = await this.cropImageQuarter(cut, j * wq, i * hq, wq, hq);
+          if (!quarterCut) throw new Error('countColonies_Error: La imagen no se pudo cortar.');
           const total = await this.countColoniesByContours(quarterCut, sensitivity);
-          quarterTotals.push(total);
+          // console.log("quarter: x,y,w,h",j,i,wq,hq);
+          // console.info("total",total);
+          if (total) {
+            // console.info("total:", total.colonies);
+            totalByQuarters.push(total.colonies);
+            quarterOverviews.push(total.reference);
+          }
         }
       }
-      const colonySumary = quarterTotals.reduce((acc, curr) => acc + curr, 0);
+      const colonySumary = totalByQuarters.reduce((acc, curr) => acc + curr);
       // Convertir imagen a base64 para overview
-      const overview = cut.toString('base64');
+      // console.info("Total by quarters: ",totalByQuarters);
+      const overview = await this.overviewImage(cut,2,totalByQuarters);
 
-      return { total: colonySumary, img: overview };
+      return { total: colonySumary, quarter: overview, references:{ totals:totalByQuarters,images:quarterOverviews} };
     } catch (error) {
       if (error instanceof Error) throw new Error(`Error contando colonias: ${error.message}`);
-      return { total: 0, img: '' };
+      return null;
     }
   }
 
@@ -183,7 +206,8 @@ export class CounterController {
       const w = jimpImage.width;
       const qh = Math.floor(h / quarters);
       const qw = Math.floor(w / quarters);
-
+      // console.log("qh: ",qh);
+      // console.log("qw: ",qw);
       // Colores para las líneas y texto
       const lineColor = 0xFF0000FF; // Rojo brillante
       const textBackgroundColor = 0x000000AA; // Negro semi-transparente
@@ -243,6 +267,7 @@ export class CounterController {
           const y = i * qh;
 
           // Agregar texto con el total
+          // console.log("Totales en"+idx+": ",totals[idx]);
           const texto = totals[idx].toString();
 
           // Calcular posición centrada del texto en el cuadrante
@@ -279,13 +304,14 @@ export class CounterController {
     }
   }
 
-  async countColoniesByContours(image: Buffer, sensitivity: number = 50): Promise<number> {
+  async countColoniesByContours(image: Buffer, sensitivity: number = 50): Promise<{colonies:number,reference:Buffer<ArrayBufferLike>}|null> {
     try {
       const contours = await ImageProcessor.findContours(image, sensitivity);
-      return contours;
+      if (!contours) throw new Error("countColoniesByContours_Error: No se encontraron contornos.")
+      return {colonies:contours.total, reference:contours.image};
     } catch (error) {
       if (error instanceof Error) throw new Error(`Error contando colonias por contornos: ${error.message}`);
-      return 0;
+      return null;
     }
   }
 }

@@ -5,13 +5,14 @@ import ResultsDisplay from '../components/ResultsDisplay.astro';
 import { actions } from 'astro:actions';
 
 const result = Astro.getActionResult(actions.processImage);
+// console.log(result);
 ---
 
 <Layout>
   {result?.data ? (
-    <ResultsDisplay result={result.data.data} />
+    <ResultsDisplay result={result?.data?.data} />
   ) : result?.error ? (
-    <ResultsDisplay error={result.error.message} />
+    <ResultsDisplay error={result?.error?.message} />
   ) : (
     <ImageUploadForm />
   )}

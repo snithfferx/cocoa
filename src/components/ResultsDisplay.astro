@@ -2,13 +2,17 @@
 interface Props {
   result: {
     avg: number;
-    ovv: string;
+    ovi: string;
     totals: {
-      quarters: number[];
-      imgs: string[];
+        quarters: {
+            totals: number[];
+            images: Buffer<ArrayBufferLike>[];
+        }[];
+        values: number[];
+        images: string[];
     };
     name: string;
-  }|null;
+} | null;
   error?: string;
 }
 
@@ -32,7 +36,7 @@ const { result, error } = Astro.props;
           <h3>Vista General</h3>
           <div class="overview-image">
             <img 
-              src={`data:image/png;base64,${result.ovv}`} 
+              src={`data:image/png;base64,${result.ovi}`} 
               alt="Vista general con cuadrantes"
               class="overview-img"
             />
@@ -41,18 +45,18 @@ const { result, error } = Astro.props;
 
         <!-- Detalles por cuadrante -->
         <div class="quarters-section">
-          <h3>Detalles por Cuadrante</h3>
+          <h3>Detalles por Cuadrante para {result.name}</h3>
           <div class="quarters-grid">
-            {result.totals.quarters.map((count, index) => (
+            {result.totals.values.map((count, index) => (
               <div class="quarter-card">
                 <div class="quarter-header">
                   <span class="quarter-title">Cuadrante {index + 1}</span>
                   <span class="quarter-count">{count} colonias</span>
                 </div>
-                {result.totals.imgs[index] && (
+                {result.totals.images[index] && (
                   <div class="quarter-image">
                     <img 
-                      src={`data:image/png;base64,${result.totals.imgs[index]}`} 
+                      src={`data:image/png;base64,${result.totals.images[index]}`} 
                       alt={`Cuadrante ${index + 1}`}
                       class="quarter-img"
                     />
@@ -69,19 +73,19 @@ const { result, error } = Astro.props;
           <div class="stats-grid">
             <div class="stat-item">
               <span class="stat-label">Total de Cuadrantes:</span>
-              <span class="stat-value">{result.totals.quarters.length}</span>
+              <span class="stat-value">{result.totals.values.length}</span>
             </div>
             <div class="stat-item">
               <span class="stat-label">Colonias Totales:</span>
-              <span class="stat-value">{result.totals.quarters.reduce((sum, count) => sum + count, 0)}</span>
+              <span class="stat-value">{result.totals.values.reduce((sum, count) => sum + count, 0)}</span>
             </div>
             <div class="stat-item">
               <span class="stat-label">Máximo por Cuadrante:</span>
-              <span class="stat-value">{Math.max(...result.totals.quarters)}</span>
+              <span class="stat-value">{Math.max(...result.totals.values)}</span>
             </div>
             <div class="stat-item">
               <span class="stat-label">Mínimo por Cuadrante:</span>
-              <span class="stat-value">{Math.min(...result.totals.quarters)}</span>
+              <span class="stat-value">{Math.min(...result.totals.values)}</span>
             </div>
           </div>
         </div>
@@ -247,9 +251,10 @@ const { result, error } = Astro.props;
 
   .quarter-img {
     width: 100%;
-    height: 120px;
-    object-fit: cover;
+    height: 150px;
+    object-fit: contain;
     border-radius: 8px;
+    margin: 2px
   }
 
   .stats-grid {
