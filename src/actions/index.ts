@@ -41,20 +41,18 @@ export const server = {
           throw new ActionError({message: result.message, code: 'BAD_REQUEST'});
         }
         
-        console.log('Resultado procesado correctamente:', { status: result.status });
         const response = {
           success: true,
           data: result.data
         };
-        console.log('Enviando respuesta:', { success: response.success });
         return response;
       } catch (error) {
-        console.error('Error en processImage action:', error);
+        
         if (error instanceof Error) {
-          console.error('Error específico:', error.message);
+          
           throw new ActionError({message: error.message, code: 'BAD_REQUEST'});
         }
-        console.error('Error desconocido');
+        
         throw new ActionError({message:'Error desconocido procesando la imagen',code: 'INTERNAL_SERVER_ERROR'});
       }
     }
