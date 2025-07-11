@@ -1,4 +1,6 @@
 {
-	"extends": ["standard"],
-	"plugins": ["import", "n", "promise"]
+	"extends": [
+		"standard"
+	],
+	// "plugins": ["import", "promise"],
 }

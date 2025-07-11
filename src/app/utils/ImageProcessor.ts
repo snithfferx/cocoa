@@ -1,8 +1,5 @@
 import { Jimp } from 'jimp';
-// import cv from "@techstark/opencv-js"
 import cvReadyPromise from "@techstark/opencv-js";
-// import * as cv from '@techstark/opencv-js';
-import {createCanvas, Image, ImageData} from 'canvas';
 
 export class ImageProcessor {
   /**
@@ -161,18 +158,11 @@ export class ImageProcessor {
     try {
       // Asegurarse de que OpenCV esté inicializado correctamente
       const cv = await cvReadyPromise;
-      // Crear imagen
-      const image = new Image();
-      // Agregar buffer
-      image.src = imageBuffer;
-      // Crear lienzo de imagen
-      const imageCanvas = createCanvas(image.width,image.height);
-      // Obtener el contexto
-      const context = imageCanvas.getContext('2d');
-      // Dibujar imagen
-      context.drawImage(image,0,0);
-      // Obtener datos de imagen
-      const imageData = context.getImageData(0,0,image.width,image.height)
+      // Leer imagen
+      const jimpImg = await Jimp.read(imageBuffer);
+      const { width, height, data } = jimpImg.bitmap;
+      const rgbaData = new Uint8ClampedArray(data);
+      const imageData = { data: rgbaData, width, height }
       // Convertir en Mat
       const source = cv.matFromImageData(imageData);
       const gray = new cv.Mat();
@@ -183,6 +173,7 @@ export class ImageProcessor {
       cv.cvtColor(source,gray,cv.COLOR_RGBA2GRAY,0);
       cv.Canny(gray,edges,sensitivity,150);
       cv.findContours(edges,contours,hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+
       let coloniasValidas = 0;
       for (let i = 0; i < contours.size(); ++i) {
         const contorno = contours.get(i);
@@ -196,19 +187,13 @@ export class ImageProcessor {
         cv.drawContours(source, contours, i, new cv.Scalar(255, 0, 0, 255), 2);
       }
       // Convertir resultado en imagen
-      const result = createCanvas(source.cols, source.rows);
-      const resultContext = result.getContext('2d');
+      const result = new Jimp({
+        data:Buffer.from(source.data),
+        width:source.cols, 
+        height:source.rows});
       
-      // Crear una ImageData a partir de la matriz source
-      const imgData = new ImageData(
-        new Uint8ClampedArray(source.data),
-        source.cols,
-        source.rows
-      );
-      
-      // Dibujar la ImageData en el canvas
-      resultContext.putImageData(imgData, 0, 0);
-      const resultBuffer = result.toBuffer();
+      // Generar buffer
+      const resultBuffer = await result.getBuffer("image/png") ;// result.toBuffer();
 
       // Liberar memoria
       source.delete(); gray.delete(); edges.delete(); contours.delete(); hierarchy.delete();
@@ -220,4 +205,13 @@ export class ImageProcessor {
       return null;
     }
   }
+
+  // async function matToBuffer(mat: cv.Mat): Promise<Buffer> {
+  //   const width = mat.cols;
+  //   const height = mat.rows;
+  //   const rgba = Buffer.from(mat.data); // RGBA plano
+  
+  //   const jimpImage = new Jimp({ data: rgba, width, height });
+  //   return await jimpImage.getBufferAsync(Jimp.MIME_PNG);
+  // }
 }
